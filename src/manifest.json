@@ -3,10 +3,16 @@
 
     "name": "FFP - Epic! Helper",
     "description": "Funcionalidades adicionales para Epic!",
-    "version": "1.0",
+    "version": "1.1",
+
+    "icons": {
+        "16": "css/img/icon16.png",
+        "48": "css/img/icon48.png",
+        "128": "css/img/icon128.png"
+    },
 
     "browser_action": {
-        "default_icon": "icon.png",
+        "default_icon": "css/img/icon48.png",
         "default_popup": "popup.html"
     },
 
