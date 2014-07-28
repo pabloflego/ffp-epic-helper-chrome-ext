@@ -1,0 +1,7 @@
+Version 1.0 - 2014-07-27
+English:
+  - First launch
+  - Show/Hide Inactive courses 
+Español:
+  - Primer lanzamiento
+  - Mostrar/Ocultar cursos inactivos
