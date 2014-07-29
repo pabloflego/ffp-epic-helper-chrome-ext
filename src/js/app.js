@@ -1,3 +1,16 @@
+var Utils = {
+    "getCookie": function(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0; i<ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1);
+            if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+        }
+        return "";
+    }
+};
+
 // Set Global Configs/Objects
 var FFP = {
     debug: false,
@@ -6,7 +19,9 @@ var FFP = {
     // Functions
     counters: {
         rawCoursesAttempts: 1,
-        maxRawCoursesAttempts: 10
+        maxRawCoursesAttempts: 10,
+        waitForMin: 1,
+        waitForMax: 10
     },
     fn: {
         init: function(){}, // Init the app
@@ -14,7 +29,8 @@ var FFP = {
         wrapCourses: function(){}, // Wrap All courses for easy manipulation
         menu: {
             toggleInactives: function(){} // Shows/Hides inactive courses
-        }
+        },
+        setPerks: function(){}
     }
 };
 // Set Application Strings
@@ -25,6 +41,25 @@ FFP.strings = {
             off: 'Mostrar Inactivos' // If Inactives are off, option is Show
         }
     }
+};
+
+FFP.fn.waitFor = function(callback) {
+    callback = typeof callback === 'function' ? callback : function(){};
+    var $r = $.Deferred(),
+        i = FFP.counters.waitForMin;
+    setTimeout(function() {
+        // Try up to FFP.counters.maxRawCoursesAttempts times to get the courses list
+        while(i < FFP.counters.waitForMax) {
+            FFP.$courses = $('[data-bind="foreach: courses"]');
+            if(FFP.$courses.children().length) {
+                // It means that children were found
+                $r.resolve();
+                break;
+            }
+            i++;
+        }
+    }, 200);
+    return $r.promise();
 };
 
 /**
@@ -121,6 +156,32 @@ FFP.fn.getRawCourses = function() {
     }, 200);
     return $r.promise();
 };
+
+/**
+ * Set Perks
+ */
+FFP.fn.setPerks = function() {
+    var perks = [
+        // [function() {}, true|false ]
+    ];
+    // Execute all perks
+    $.each(perks, function(){
+        if(this[1] && typeof this[0] === 'function') this[0]();
+    });
+};
+
+/**
+ * Disable Welcome Tour dialog
+ */
+(function() {
+    var c = Utils.getCookie("epic-welcome-tour");
+
+    if(c !== 'forget') {
+        document.cookie = "epic-welcome-tour=forget; expires=session; path=/Learn";
+        location.reload();
+    }
+
+})();
 
 $(document).ready(function () {
     // Since some times content loads async it may not be available yet so try again
