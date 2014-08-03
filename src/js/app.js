@@ -1,6 +1,11 @@
 var Utils = {
-    "getCookie": function(cname) {
-        var name = cname + "=";
+    /**
+     * Get given "name" cookie
+     * @param name
+     * @returns {string}
+     */
+    "getCookie": function(name) {
+        name = name + "=";
         var ca = document.cookie.split(';');
         for(var i=0; i<ca.length; i++) {
             var c = ca[i];
@@ -8,38 +13,58 @@ var Utils = {
             if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
         }
         return "";
+    },
+    /**
+     * Set cookie
+     * @param params
+     */
+    "setCookie": function(params) {
+        var defaults = {
+            "name": false,
+            "value": false,
+            "expires": "session",
+            "path": "/"
+        };
+        params = $.extend({}, defaults, params);
+        if(params.name && params.value) {
+            document.cookie = params.name + '=' + params.value + '; expires=' + params.expires + '; path=' + params.path;
+        }
     }
+
 };
 
 // Set Global Configs/Objects
 var FFP = {
-    debug: false,
-    $menu: {}, // Instance of the menu
-    $courses: {}, // Contains all wrapped courses
+    "debug": Utils.getCookie("ffp-epic-helper-debug").length,
+    "$menu": {}, // Instance of the menu
+    "$courses": {}, // Contains all wrapped courses
     // Functions
-    counters: {
-        rawCoursesAttempts: 1,
-        maxRawCoursesAttempts: 10,
-        waitForMin: 1,
-        waitForMax: 10
+    "counters": {
+        "rawCoursesAttempts": 1,
+        "maxRawCoursesAttempts": 10,
+        "waitForMin": 1,
+        "waitForMax": 10
     },
-    fn: {
-        init: function(){}, // Init the app
-        buildMenu: function(){}, // Builds the menu
-        wrapCourses: function(){}, // Wrap All courses for easy manipulation
-        menu: {
-            toggleInactives: function(){} // Shows/Hides inactive courses
+    "fn": {
+        "init": function(){}, // Init the app
+        "buildMenu": function(){}, // Builds the menu
+        "wrapCourses": function(){}, // Wrap All courses for easy manipulation
+        "menu": {
+            "toggleInactives": function(){} // Shows/Hides inactive courses
         },
-        setPerks: function(){}
+        "setPerks": function(){}
     }
 };
 // Set Application Strings
 FFP.strings = {
-    menu: {
-        btnToggleInactives: {
-            on: 'Ocultar Inactivos', // If Inactives are on, option is Hide
-            off: 'Mostrar Inactivos' // If Inactives are off, option is Show
+    "menu": {
+        "btnToggleInactives": {
+            "on": 'Ocultar Inactivos', // If Inactives are on, option is Hide
+            "off": 'Mostrar Inactivos' // If Inactives are off, option is Show
         }
+    },
+    "debug": {
+        "logPrefix": "[FFP Debug:] "
     }
 };
 
@@ -141,6 +166,7 @@ FFP.fn.menu.toggleInactives = function() {
 };
 
 FFP.fn.getRawCourses = function() {
+    // Since some times content loads async it may not be available yet so try again
     var $r = $.Deferred();
     setTimeout(function() {
         // Try up to FFP.counters.maxRawCoursesAttempts times to get the courses list
@@ -174,21 +200,25 @@ FFP.fn.setPerks = function() {
  * Disable Welcome Tour dialog
  */
 (function() {
-    var c = Utils.getCookie("epic-welcome-tour");
-
-    if(c !== 'forget') {
-        document.cookie = "epic-welcome-tour=forget; expires=session; path=/Learn";
-        location.reload();
+    var tourCookie = Utils.getCookie("epic-welcome-tour"),
+        noReloadCookie = Utils.getCookie("ffp-epic-helper-no-reload");
+    if(tourCookie !== 'forget') {
+        // Set the cookie that tells the system not to show the dialog
+        Utils.setCookie({"name": "epic-welcome-tour", "value": "forget"});
+        // If for any reason previous cookie wasn't set, set my own to avoid reload loop
+        Utils.setCookie({"name": "ffp-epic-helper-no-reload", "value": 1});
+        // Avoid reload again if no-reload cookie was already set
+        noReloadCookie.length && location.reload();
     }
 
 })();
 
 $(document).ready(function () {
-    // Since some times content loads async it may not be available yet so try again
+    FFP.debug && console.log(FFP.strings.debug.logPrefix + 'Debug enabled');
     FFP.fn.getRawCourses()
         .done(FFP.fn.init)
         .fail(function(){
-            FFP.debug && console.log('Fail');
+            FFP.debug && console.log(FFP.strings.debug.logPrefix + 'Fail');
         }
     );
 });

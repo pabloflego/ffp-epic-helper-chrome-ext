@@ -1,3 +1,9 @@
+Version 1.1.1 - 2014-08-03
+English:
+  - Defect: Fixed reload loop on login page
+Español:
+  - Defecto: Solucionado bucle de refresco en página de inicio de sesión
+
 Version 1.1 - 2014-07-29
 English:
   - Added new app icons
