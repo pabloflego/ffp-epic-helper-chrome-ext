@@ -64,7 +64,7 @@ FFP.strings = {
         }
     },
     "debug": {
-        "logPrefix": "[FFP Debug:] "
+        "logPrefix": "[FFP Debug:] " // Prefix to identify app log messages
     }
 };
 
@@ -72,18 +72,6 @@ FFP.fn.waitFor = function(callback) {
     callback = typeof callback === 'function' ? callback : function(){};
     var $r = $.Deferred(),
         i = FFP.counters.waitForMin;
-    setTimeout(function() {
-        // Try up to FFP.counters.maxRawCoursesAttempts times to get the courses list
-        while(i < FFP.counters.waitForMax) {
-            FFP.$courses = $('[data-bind="foreach: courses"]');
-            if(FFP.$courses.children().length) {
-                // It means that children were found
-                $r.resolve();
-                break;
-            }
-            i++;
-        }
-    }, 200);
     return $r.promise();
 };
 
